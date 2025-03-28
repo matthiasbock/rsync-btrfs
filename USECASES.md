@@ -51,3 +51,17 @@ rsync --maintain-subvolume-relationships <source> <destination>
 In case, linked subvolume UUIDs are not found, rsync will print a warning and continue the transfer.
 Since it is possible, that linked subvolumes do not exist on the destination end before rsync creates them in the context of the ongoing transfer, failed subvolume relationsship restoration attempts are retried at the end of the transfer.
 
+This switch is especially useful when synchronizing snapshots, as it will enable rsync to identify and reuse files that already exist elsewhere on the destination end in a related subvolume.
+Furthermore, rsync can make use of btrfs's copy-on-write (CoW) mechanism and save disk space on the destination end.
+
+## Re-use extents
+
+Btrfs stores file content in extents. The integrity of extents is validated using checksums.
+With this switch, rsync will, before transferring files, attempt to find extents on the destination end with a checksum matching the one of the source end. In case an extent is found, it is re-used in the newly created file.
+
+~~~sh
+rsync --reuse-extents <source> <destination>
+~~~
+
+This switch is useful, when synchronizing files and folders, that already exist on the destination end e.g. in a backup folder, snapshot or other previously transfered subvolume.
+
